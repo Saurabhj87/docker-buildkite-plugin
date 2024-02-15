@@ -1,31 +1,16 @@
 steps:
-  - label: ":shell: Shellcheck"
-    plugins:
-      - shellcheck#v1.3.0:
-          files:
-            - hooks/**
-            - commands/**
-            - lib/**
+  - label: ":construction_worker: Build"
+    command: echo "Build the rocket"
+    key: build
 
-  - label: ":sparkles:"
-    plugins:
-      - plugin-linter#v3.3.0:
-          id: docker
+  - label: ":white_check_mark: Test"
+    command: echo "Test the rocket"
+    key: test
+    depends_on: build
 
-  - label: ":docker: :hammer:"
-    plugins:
-      - plugin-tester#v1.1.0: ~
-
-  - wait
-  - label: run the plugin
-    command: "echo hello world"
-    plugins:
-      - ${BUILDKITE_PULL_REQUEST_REPO:-$BUILDKITE_REPO}#${BUILDKITE_COMMIT}:
-          image: ubuntu:22.04
-  - label: ensure exit codes are propagated
-    command: "exit 3"
-    plugins:
-      - ${BUILDKITE_PULL_REQUEST_REPO:-$BUILDKITE_REPO}#${BUILDKITE_COMMIT}:
-          image: ubuntu:22.04
-    soft_fail:
-      - exit_status: 3
+  - label: ":rocket: Deploy"
+    command: |
+      echo "Launch the rocket"
+      cat .buildkite/annotation.md | buildkite-agent annotate --style "success"
+    key: deploy
+    depends_on: test
